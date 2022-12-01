@@ -3,7 +3,11 @@ import WelcomeScreen from "./Welcome";
 import socket from "../libs/socket";
 import Box from "./Box";
 import { getGameInfo } from "../libs/api";
-import { playSymbolOnTheBoard, setPlayerInformations } from "../libs/helper";
+import {
+  getNextPlayer,
+  playSymbolOnTheBoard,
+  setPlayerInformations,
+} from "../libs/helper";
 
 const GameBoard = () => {
   const currentPlayer = JSON.parse(localStorage.getItem("playerInfo"));
@@ -16,6 +20,7 @@ const GameBoard = () => {
   const [winner, setWinner] = useState("");
   const [nextPlayer, setNextPlayer] = useState("X");
   const [inPlay, setInPlay] = useState(false);
+  const [isPlayingWithBot, setIsPlayingWithBot] = useState(false);
 
   const playAgain = () => {
     localStorage.clear();
@@ -30,13 +35,32 @@ const GameBoard = () => {
   useEffect(() => {
     const getBoard = async () => {
       if (gameId) {
-        const gameInfo = await getGameInfo(gameId);
-        if (gameInfo.boardInfo) {
+        if (gameId == "PLAY_WITH_BOT") {
+          const player = currentPlayer;
+          const gameInfo = {
+            id: "PLAY_WITH_BOT",
+            boardInfo: [...Array(7)].map((x) => Array(7).fill("_")),
+            winner: "",
+            inPlay: true,
+            player1: player.symbol,
+            player2: getNextPlayer(player.symbol),
+            nextPlayer: player.symbol,
+          };
           setBoard(gameInfo.boardInfo);
           setWinner(gameInfo.winner);
           setNextPlayer(gameInfo.nextPlayer);
           setInPlay(gameInfo.inPlay);
           setPlayerInformations(currentPlayer, { gameId, inPlay });
+          setIsPlayingWithBot(true);
+        } else {
+          const gameInfo = await getGameInfo(gameId);
+          if (gameInfo.boardInfo) {
+            setBoard(gameInfo.boardInfo);
+            setWinner(gameInfo.winner);
+            setNextPlayer(gameInfo.nextPlayer);
+            setInPlay(gameInfo.inPlay);
+            setPlayerInformations(currentPlayer, { gameId, inPlay });
+          }
         }
       }
     };
@@ -52,14 +76,18 @@ const GameBoard = () => {
       !winner &&
       inPlay
     ) {
-      const { newBoard, isWin, nextToPlay } = playSymbolOnTheBoard(
+      const { newBoard, isWin, botWin, nextToPlay } = playSymbolOnTheBoard(
         row,
         col,
         board,
-        winCount
+        winCount,
+        isPlayingWithBot
       );
       if (isWin) {
         setWinner(currentPlayer.symbol);
+      }
+      if (botWin) {
+        setWinner(getNextPlayer(currentPlayer.symbol));
       }
       setBoard(newBoard);
       setNextPlayer(nextToPlay);
