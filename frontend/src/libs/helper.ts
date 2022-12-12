@@ -45,6 +45,29 @@ export const checkWinner = (
   return false;
 };
 
+export const checkValidSymbol = (
+  board: Array<Array<string>>,
+  row: number,
+  col: number
+) => {
+  console.log(row, col);
+  if (board[row][col] != "_") return false;
+
+  if (col == 0 || col == board[row].length - 1) {
+    return true;
+  }
+
+  if (col > 0 || col < board[row].length - 1) {
+    if (
+      (board[row][col - 1] != "_" && board[row][col + 1] == "_") ||
+      (board[row][col - 1] == "_" && board[row][col + 1] != "_")
+    ) {
+      return true;
+    }
+  }
+  return false;
+};
+
 export const playSymbolOnTheBoard = (
   row: number,
   col: number,
@@ -55,6 +78,11 @@ export const playSymbolOnTheBoard = (
   const currentPlayer = JSON.parse(localStorage.getItem("playerInfo")!);
   const gameId = localStorage.getItem("gameId");
   const newBoard = [...board];
+
+  if (!checkValidSymbol(newBoard, row, col)) {
+    return null;
+  }
+
   newBoard[row][col] = currentPlayer.symbol;
   let isWin = false;
   let botWin = false;
@@ -68,7 +96,7 @@ export const playSymbolOnTheBoard = (
     do {
       row = Math.floor(Math.random() * 7);
       col = Math.floor(Math.random() * 7);
-      if (newBoard[row][col] === "_") {
+      if (checkValidSymbol(newBoard, row, col)) {
         newBoard[row][col] = getNextPlayer(currentPlayer.symbol);
         botWin = checkWinner(
           newBoard,

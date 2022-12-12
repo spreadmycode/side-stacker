@@ -76,13 +76,16 @@ const GameBoard = () => {
       !winner &&
       inPlay
     ) {
-      const { newBoard, isWin, botWin, nextToPlay } = playSymbolOnTheBoard(
+      const result = playSymbolOnTheBoard(
         row,
         col,
         board,
         winCount,
         isPlayingWithBot
       );
+      if (!result) return;
+      
+      const { newBoard, isWin, botWin, nextToPlay } = result;
       if (isWin) {
         setWinner(currentPlayer.symbol);
       }
