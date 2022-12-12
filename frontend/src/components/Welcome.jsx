@@ -16,7 +16,7 @@ const WelcomeScreen = ({ setPlayer }) => {
       {joinGame && <JoinGame setPlayer={setPlayer} />}
       {!botGame && !createGame && !joinGame && (
         <div>
-          <button onClick={() => setBotGame(true)}>Create game</button>
+          <button onClick={() => setBotGame(true)}>Play with Bot</button>
           <button onClick={() => setCreateGame(true)}>Create game</button>
           <button onClick={() => setJoinGame(true)}>Join game</button>
         </div>
